@@ -4,8 +4,8 @@
     <header-bar />
     <section id="work-area">
       <svg />
+      <items-drawer />
       <button id="done-button">DONE</button>
-      <section id="items-drawer"></section>
     </section>
   </div>
 </template>
@@ -13,16 +13,14 @@
 <script>
 import NavigationBar from "./components/NavigationBar.vue";
 import HeaderBar from "./components/HeaderBar.vue";
-import { store } from "./store";
+import ItemsDrawer from "./components/ItemsDrawer.vue";
 
 export default {
   name: "App",
   components: {
     HeaderBar,
-    NavigationBar
-  },
-  mounted: () => {
-    console.log(store.state);
+    NavigationBar,
+    ItemsDrawer
   }
 };
 </script>
@@ -47,16 +45,6 @@ body {
 #work-area {
   flex-grow: 1;
   position: relative;
-}
-
-#items-drawer {
-  position: absolute;
-  width: 107px;
-  height: 330px;
-  left: 40px;
-  top: 81px;
-  border: 2px solid lightgray;
-  border-radius: 10px;
 }
 
 svg {

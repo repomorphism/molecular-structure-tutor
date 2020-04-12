@@ -1,10 +1,21 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import { ClickMode } from "./constants.js";
 
 Vue.use(Vuex);
 
-export const store = new Vuex.Store({
+export default new Vuex.Store({
   state: {
-    x: 3
-  }
+    clickMode: ClickMode.NORMAL,
+  },
+  mutations: {
+    setClickMode(state, mode) {
+      state.clickMode = mode;
+    },
+  },
+  actions: {
+    setClickMode(context, mode) {
+      context.commit("setClickMode", mode);
+    },
+  },
 });
