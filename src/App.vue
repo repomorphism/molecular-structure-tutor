@@ -2,7 +2,6 @@
   <div id="app">
     <navigation-bar />
     <header-bar />
-    <defining-feedback />
     <section id="work-area">
       <svg />
       <button id="done-button">DONE</button>
@@ -14,15 +13,13 @@
 <script>
 import NavigationBar from "./components/NavigationBar.vue";
 import HeaderBar from "./components/HeaderBar.vue";
-import DefiningFeedback from "./components/DefiningFeedback.vue";
 import { store } from "./store";
 
 export default {
   name: "App",
   components: {
     HeaderBar,
-    NavigationBar,
-    DefiningFeedback
+    NavigationBar
   },
   mounted: () => {
     console.log(store.state);
