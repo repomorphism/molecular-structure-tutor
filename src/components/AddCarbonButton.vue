@@ -1,0 +1,55 @@
+<template>
+  <button @click="setClickMode('ClickMode.ADD_CARBON')">
+    <span>
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="16.1212" cy="16.0606" r="15.1515" fill="#FFC107" />
+        <path
+          d="M9.16022 15.3633C9.16022 12.599 9.90143 10.4685 11.3838 8.97174C12.6729 7.66836 14.3129 7.01666 16.3038 7.01666C18.9678 7.01666 20.9157 7.89036 22.1475 9.63776C22.8279 10.6189 23.1931 11.6036 23.2432 12.5919H19.9346C19.7198 11.8327 19.4441 11.2598 19.1075 10.8731C18.5059 10.1856 17.6143 9.84186 16.4327 9.84186C15.2296 9.84186 14.2807 10.3288 13.586 11.3028C12.8913 12.2696 12.544 13.641 12.544 15.4171C12.544 17.1931 12.9092 18.5251 13.6397 19.4131C14.3773 20.294 15.3119 20.7344 16.4434 20.7344C17.6036 20.7344 18.488 20.3549 19.0967 19.5958C19.4333 19.1876 19.7126 18.5753 19.9346 17.7589H23.211C22.9245 19.4848 22.1905 20.8884 21.0088 21.9698C19.8344 23.0512 18.3269 23.5919 16.4864 23.5919C14.209 23.5919 12.4187 22.8614 11.1153 21.4005C9.81191 19.9324 9.16022 17.92 9.16022 15.3633Z"
+          fill="white"
+        />
+      </svg>
+      <span>Carbon</span>
+    </span>
+  </button>
+</template>
+
+<script>
+import { mapActions } from "vuex";
+import { ClickMode } from "../store/constants";
+
+export default {
+  name: "AddCarbonButton",
+  methods: {
+    ...mapActions(["setClickMode"]),
+    setAddCarbon() {
+      console.log("setting add carbon");
+      this.setClickMode(ClickMode.ADD_CARBON);
+    }
+  }
+};
+</script>
+
+<style scoped>
+button {
+  border: 0;
+}
+
+button > span {
+  display: flex;
+  flex-direction: column;
+  font-size: 18px;
+  margin: 4px 0px 4px 0px;
+}
+
+svg {
+  position: relative;
+  min-height: 60px;
+  margin: 0 0 8px 0;
+}
+</style>
