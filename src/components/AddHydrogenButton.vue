@@ -35,10 +35,4 @@ button > span {
   font-size: 18px;
   margin: 4px 0px 4px 0px;
 }
-
-svg {
-  position: relative;
-  min-height: 60px;
-  margin: 0 0 8px 0;
-}
 </style>
