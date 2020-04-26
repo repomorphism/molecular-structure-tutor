@@ -3,7 +3,7 @@
     <navigation-bar />
     <header-bar />
     <section id="work-area">
-      <svg />
+      <main-canvas />
       <items-drawer />
       <button id="done-button">DONE</button>
     </section>
@@ -14,13 +14,15 @@
 import NavigationBar from "./components/NavigationBar.vue";
 import HeaderBar from "./components/HeaderBar.vue";
 import ItemsDrawer from "./components/ItemsDrawer.vue";
+import MainCanvas from "./components/MainCanvas.vue";
 
 export default {
   name: "App",
   components: {
     HeaderBar,
     NavigationBar,
-    ItemsDrawer
+    ItemsDrawer,
+    MainCanvas
   }
 };
 </script>
