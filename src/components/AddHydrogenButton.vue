@@ -1,5 +1,5 @@
 <template>
-  <button>
+  <button @click="setAddHydrogen">
     <span>
       <svg
         width="31"
@@ -20,8 +20,17 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+import { ClickMode } from "../store/constants";
+
 export default {
-  name: "AddHydrogenButton"
+  name: "AddHydrogenButton",
+  methods: {
+    ...mapActions(["setClickMode"]),
+    setAddHydrogen() {
+      this.setClickMode(ClickMode.ADD_HYDROGEN);
+    }
+  }
 };
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <button>
+  <button @click="setAddBond">
     <span>
       <svg
         width="31"
@@ -16,8 +16,17 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+import { ClickMode } from "../store/constants";
+
 export default {
-  name: "AddBondButton"
+  name: "AddBondButton",
+  methods: {
+    ...mapActions(["setClickMode"]),
+    setAddBond() {
+      this.setClickMode(ClickMode.ADD_BOND);
+    }
+  }
 };
 </script>
 

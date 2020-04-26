@@ -1,5 +1,5 @@
 <template>
-  <button @click="setClickMode('ClickMode.ADD_CARBON')">
+  <button @click="setAddCarbon">
     <span>
       <svg
         width="32"
@@ -28,7 +28,6 @@ export default {
   methods: {
     ...mapActions(["setClickMode"]),
     setAddCarbon() {
-      console.log("setting add carbon");
       this.setClickMode(ClickMode.ADD_CARBON);
     }
   }
