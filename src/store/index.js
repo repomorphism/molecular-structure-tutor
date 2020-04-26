@@ -21,16 +21,17 @@ export default new Vuex.Store({
     setClickMode(context, mode) {
       context.commit("setClickMode", mode);
     },
-    performCanvasAction(context, event) {
+    performCanvasAction(context, position) {
+      const { x, y } = position;
       switch (context.state.clickMode) {
         case ClickMode.ADD_CARBON:
-          context.commit("addAtom", { name: "carbon", x: event.x, y: event.y });
+          context.commit("addAtom", { type: "carbon", x, y });
           break;
         case ClickMode.ADD_HYDROGEN:
           context.commit("addAtom", {
-            name: "hydrogen",
-            x: event.x,
-            y: event.y,
+            type: "hydrogen",
+            x,
+            y,
           });
           break;
         default:
