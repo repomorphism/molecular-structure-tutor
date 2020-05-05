@@ -1,5 +1,5 @@
 <template>
-  <svg @click="onClick">
+  <svg ref="parent-svg" @click="onClick">
     <component
       v-for="(atom, index) in atoms"
       v-bind:key="atom.type + index"
@@ -22,7 +22,7 @@ export default {
   methods: {
     ...mapActions(["performCanvasAction"]),
     onClick(event) {
-      const svg = event.target;
+      const svg = this.$refs["parent-svg"];
       var point = svg.createSVGPoint();
       point.x = event.clientX - 30;
       point.y = event.clientY - 30;
