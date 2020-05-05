@@ -7,8 +7,8 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     clickMode: ClickMode.NORMAL,
-    atoms: [],
-    bonds: [],
+    atoms: [], // array of {type, x, y} where type = carbon/hydrogen
+    bonds: [], // array of {atom1, atom2}
     bondStartAtom: null,
   },
   mutations: {
@@ -20,6 +20,9 @@ export default new Vuex.Store({
     },
     setBondStartAtom(state, atom) {
       state.bondStartAtom = atom;
+    },
+    addBond(state, bond) {
+      state.bonds.push(bond);
     },
   },
   actions: {
@@ -41,17 +44,39 @@ export default new Vuex.Store({
           });
           context.commit("setClickMode", ClickMode.NORMAL);
           break;
-        case ClickMode.ADD_BOND:
+        case ClickMode.ADD_BOND: {
+          // Find which atom is clicked
+          let clickedAtom = null;
           for (const atom of context.state.atoms) {
             const radius = 30;
             const dx = atom.x - x;
             const dy = atom.y - y;
             if (dx * dx + dy * dy <= radius * radius) {
-              console.log(atom.x, atom.y);
+              clickedAtom = atom;
               break;
             }
           }
+          if (!clickedAtom) {
+            break;
+          }
+
+          let startAtom = context.state.bondStartAtom;
+          if (startAtom) {
+            // Add bond and reset
+            if (clickedAtom != startAtom) {
+              context.commit("addBond", {
+                atom1: context.state.bondStartAtom,
+                atom2: clickedAtom,
+              });
+              context.commit("setBondStartAtom", null);
+              context.commit("setClickMode", ClickMode.NORMAL);
+            }
+          } else {
+            // Save as starting atom of bond
+            context.commit("setBondStartAtom", clickedAtom);
+          }
           break;
+        }
         default:
           break;
       }
