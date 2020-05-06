@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import { ClickMode } from "./constants.js";
+import { findClickedAtom } from "./helperFunctions.js";
 
 Vue.use(Vuex);
 
@@ -8,7 +9,7 @@ export default new Vuex.Store({
   state: {
     clickMode: ClickMode.NORMAL,
     atoms: [], // array of {type, x, y} where type = carbon/hydrogen
-    bonds: [], // array of {atom1, atom2}
+    bonds: {}, // object of { (string id from atom indices) : { atom1, atom2, count } }
     bondStartAtom: null,
   },
   mutations: {
@@ -21,8 +22,21 @@ export default new Vuex.Store({
     setBondStartAtom(state, atom) {
       state.bondStartAtom = atom;
     },
-    addBond(state, bond) {
-      state.bonds.push(bond);
+    addBond(state, bondAtoms) {
+      const bonds = { ...state.bonds };
+      const atomIndices = bondAtoms.map((atom) => state.atoms.indexOf(atom));
+      const bondID = atomIndices.sort().toString();
+      if (bondID in bonds) {
+        const originalCount = bonds[bondID].count;
+        bonds[bondID].count = originalCount + 1;
+      } else {
+        bonds[bondID] = {
+          atom1: bondAtoms[0],
+          atom2: bondAtoms[1],
+          count: 1,
+        };
+      }
+      state.bonds = bonds;
     },
   },
   actions: {
@@ -46,30 +60,24 @@ export default new Vuex.Store({
           break;
         case ClickMode.ADD_BOND: {
           // Find which atom is clicked
-          let clickedAtom = null;
-          for (const atom of context.state.atoms) {
-            const radius = 30;
-            const dx = atom.x - x;
-            const dy = atom.y - y;
-            if (dx * dx + dy * dy <= radius * radius) {
-              clickedAtom = atom;
-              break;
-            }
-          }
+          let clickedAtom = findClickedAtom(context.state.atoms, x, y);
           if (!clickedAtom) {
             break;
           }
 
           let startAtom = context.state.bondStartAtom;
           if (startAtom) {
-            // Add bond and reset
             if (clickedAtom != startAtom) {
-              context.commit("addBond", {
-                atom1: context.state.bondStartAtom,
-                atom2: clickedAtom,
-              });
+              // Add bond
+              context.commit("addBond", [
+                context.state.bondStartAtom,
+                clickedAtom,
+              ]);
+              // Reset
               context.commit("setBondStartAtom", null);
               context.commit("setClickMode", ClickMode.NORMAL);
+            } else {
+              // Clicking on same atom gets ignored
             }
           } else {
             // Save as starting atom of bond

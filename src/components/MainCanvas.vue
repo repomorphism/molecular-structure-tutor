@@ -1,5 +1,6 @@
 <template>
   <svg ref="parent-svg" @click="onClick">
+    <atoms-bond v-for="(bond, key) in bonds" v-bind:key="key" v-bind:bond="bond" />
     <component
       v-for="(atom, index) in atoms"
       v-bind:key="atom.type + index"
@@ -15,10 +16,11 @@ import { mapActions } from "vuex";
 import store from "../store";
 import CarbonAtom from "./CarbonAtom.vue";
 import HydrogenAtom from "./HydrogenAtom.vue";
+import AtomsBond from "./AtomsBond.vue";
 
 export default {
   name: "MainCanvas",
-  components: { CarbonAtom, HydrogenAtom },
+  components: { CarbonAtom, HydrogenAtom, AtomsBond },
   methods: {
     ...mapActions(["performCanvasAction"]),
     onClick(event) {
@@ -36,6 +38,9 @@ export default {
   computed: {
     atoms() {
       return store.state.atoms;
+    },
+    bonds() {
+      return store.state.bonds;
     }
   }
 };
