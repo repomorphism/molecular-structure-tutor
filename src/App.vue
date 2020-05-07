@@ -1,13 +1,22 @@
 <template>
   <div id="app">
-    <navigation-bar />
-    <header-bar />
-    <section id="work-area">
-      <main-canvas />
-      <items-drawer />
-      <feedback-box v-if="submitted" id="feedback-text" />
-      <button id="done-button" @click="onClick">DONE</button>
-    </section>
+    <div v-if="userRole == 'student'">
+      <button @click="setUserRole('teacher')">Change Role</button>
+      <section id="work-area">
+        <main-canvas />
+        <items-drawer />
+      </section>
+    </div>
+    <div v-if="userRole == 'teacher'">
+      <navigation-bar />
+      <header-bar />
+      <section id="work-area">
+        <main-canvas />
+        <items-drawer />
+        <feedback-box v-if="submitted" id="feedback-text" />
+        <button id="done-button" @click="onClick">DONE</button>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -31,6 +40,7 @@ export default {
   },
   data: function() {
     return {
+      userRole: "student",
       submitted: true //submitted is false then no feedback box displayed
     };
   },
@@ -223,6 +233,9 @@ export default {
         feedbackBG.className = "";
         feedbackBG.className += "feedback-incorrect";
       }
+    },
+    setUserRole(role) {
+      this.userRole = role;
     }
   },
   computed: {
@@ -258,13 +271,18 @@ body {
 #app {
   width: 100vw;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+#app > div {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 #work-area {
