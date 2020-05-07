@@ -5,7 +5,7 @@
     <section id="work-area">
       <main-canvas />
       <items-drawer />
-      <feedback-box v-if="submitted" id="feedback-text"/>
+      <feedback-box v-if="submitted" id="feedback-text" />
       <button id="done-button" @click="onClick">DONE</button>
     </section>
   </div>
@@ -13,6 +13,7 @@
 
 <script>
 import store from "./store";
+import { mapActions } from "vuex";
 import NavigationBar from "./components/NavigationBar.vue";
 import HeaderBar from "./components/HeaderBar.vue";
 import ItemsDrawer from "./components/ItemsDrawer.vue";
@@ -30,135 +31,194 @@ export default {
   },
   data: function() {
     return {
-      submitted: true,     //submitted is false then no feedback box displayed
+      submitted: true //submitted is false then no feedback box displayed
     };
   },
   methods: {
+    ...mapActions(["setHighlightedAtoms"]),
     onClick() {
       function findValueByPrefix(object, prefix) {
         for (var property in object) {
-          if (property in object &&
-             property.toString().startsWith(prefix)) {
-             return property.split(",")[property.split(",").length - 1];
+          if (property in object && property.toString().startsWith(prefix)) {
+            return property.split(",")[property.split(",").length - 1];
           }
         }
       }
       var elems = document.querySelectorAll(".boundaryAtom");
       [].forEach.call(elems, function(el) {
-          el.classList.remove("boundaryAtom");
+        el.classList.remove("boundaryAtom");
       });
-      var atomCount = {}, bondCount = {}, bondids = {}, flag = false, i, j, k, feedbackBG, nobonds=true;   //atomCount is count of atoms in canvas right now
-      var temp = this.molecule.split(/([0-9]+)/);     //separating molecule into array of [symbol, count]
-      for (j = 0; j < temp.length-1; j += 2)
-      {
+      var atomCount = {},
+        bondCount = {},
+        bondids = {},
+        flag = false,
+        i,
+        j,
+        k,
+        feedbackBG,
+        nobonds = true; //atomCount is count of atoms in canvas right now
+      var temp = this.molecule.split(/([0-9]+)/); //separating molecule into array of [symbol, count]
+      for (j = 0; j < temp.length - 1; j += 2) {
         atomCount[temp[j]] = 0;
       }
       this.submitted = true;
       for (k in this.atoms) {
         if (k in this.atoms) {
           if (this.atoms[k].symbol in atomCount) {
-            atomCount[this.atoms[k].symbol] = atomCount[this.atoms[k].symbol] + 1;
-          }
-          else {
+            atomCount[this.atoms[k].symbol] =
+              atomCount[this.atoms[k].symbol] + 1;
+          } else {
             atomCount[this.atoms[k].symbol] = 1;
           }
         }
       }
-      for (i = 0; i < temp.length-1; i += 2)
-      {
+      for (i = 0; i < temp.length - 1; i += 2) {
         //console.log(i, atomCount[temp[i]], temp[i+1]);
-        if (atomCount[temp[i]]<temp[i+1])
-        {
+        if (atomCount[temp[i]] < temp[i + 1]) {
           flag = true;
-          this.feedback = "The " + temp[i] + " atoms are missing. Add more " + temp[i] + " atoms from the sidebar";
+          this.feedback =
+            "The " +
+            temp[i] +
+            " atoms are missing. Add more " +
+            temp[i] +
+            " atoms from the sidebar";
           break;
         }
-        if (atomCount[temp[i]]>temp[i+1])
-        {
+        if (atomCount[temp[i]] > temp[i + 1]) {
           flag = true;
-          this.feedback = "The " + temp[i] + " atoms are more than required. See the question carefully  and start again";
+          this.feedback =
+            "The " +
+            temp[i] +
+            " atoms are more than required. See the question carefully  and start again";
           break;
         }
       }
-      if (flag==false)
-      {
+      if (flag == false) {
+        // fetch a bond
+        let myBond = null;
         for (k in this.bonds) {
-          if (k in this.bonds) {
-            if ([this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count] in bondCount) {
-              if(this.bonds[k].atom1.symbol==this.bonds[k].atom1.symbol) {
-                bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] + 1;
-                bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol]].push(this.bonds[k].count);
-              }
-              else {
-                bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] + 1;
-                bondCount[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol, this.bonds[k].count]] = bondCount[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol, this.bonds[k].count]] + 1;
-                bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol]].push(this.bonds[k].count);
-                bondids[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol]].push(this.bonds[k].count);
-              }
-            }
-            else {
-              bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = 1;
-              bondCount[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol, this.bonds[k].count]] = 1;
-              bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol]] = [this.bonds[k].count];
-              bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol]] = [this.bonds[k].count];
-            }
-            console.log(bondCount);
-            nobonds=false;
-          }
+          myBond = this.bonds[k];
+          break;
         }
+
+        this.setHighlightedAtoms([myBond.atom1, myBond.atom2]);
+
+        // for (k in this.bonds) {
+        //   if (k in this.bonds) {
+        //     if ([this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count] in bondCount) {
+        //       if(this.bonds[k].atom1.symbol==this.bonds[k].atom1.symbol) {
+        //         bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] + 1;
+        //         bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol]].push(this.bonds[k].count);
+        //       }
+        //       else {
+        //         bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] + 1;
+        //         bondCount[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol, this.bonds[k].count]] = bondCount[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol, this.bonds[k].count]] + 1;
+        //         bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol]].push(this.bonds[k].count);
+        //         bondids[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol]].push(this.bonds[k].count);
+        //       }
+        //     }
+        //     else {
+        //       bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = 1;
+        //       bondCount[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol, this.bonds[k].count]] = 1;
+        //       bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol]] = [this.bonds[k].count];
+        //       bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol]] = [this.bonds[k].count];
+        //     }
+        //     console.log(bondCount);
+        //     nobonds=false;
+        //   }
+        // }
         for (k in this.moleculeBonds) {
           if (k in this.moleculeBonds) {
-            temp = JSON.parse(k);//findValueByPrefix(obj, "key1")
-            console.log(typeof(k), k, typeof(temp), temp, bondCount[temp[0]+','+temp[1]+','+temp[2]], bondids[temp[0]+','+temp[1]], this.moleculeBonds[k]);
-            if (bondCount[temp[0]+','+temp[1]+','+temp[2]]) {
-              if (bondCount[temp[0]+','+temp[1]+','+temp[2]] < this.moleculeBonds[k]) {
+            temp = JSON.parse(k); //findValueByPrefix(obj, "key1")
+            console.log(
+              typeof k,
+              k,
+              typeof temp,
+              temp,
+              bondCount[temp[0] + "," + temp[1] + "," + temp[2]],
+              bondids[temp[0] + "," + temp[1]],
+              this.moleculeBonds[k]
+            );
+            if (bondCount[temp[0] + "," + temp[1] + "," + temp[2]]) {
+              if (
+                bondCount[temp[0] + "," + temp[1] + "," + temp[2]] <
+                this.moleculeBonds[k]
+              ) {
                 flag = true;
-                this.feedback = "The number of bonds between " + temp[0] + " and " + temp[1] + " are incorrect.";
+                this.feedback =
+                  "The number of bonds between " +
+                  temp[0] +
+                  " and " +
+                  temp[1] +
+                  " are incorrect.";
                 //element.classList.add("highlightSVG");
                 break;
-              }
-              else if (bondCount[temp[0]+','+temp[1]+','+temp[2]] > this.moleculeBonds[k]) {
+              } else if (
+                bondCount[temp[0] + "," + temp[1] + "," + temp[2]] >
+                this.moleculeBonds[k]
+              ) {
                 flag = true;
-                this.feedback = "The number of bonds between " + temp[0] + " and " + temp[1] + " are incorrect.";
+                this.feedback =
+                  "The number of bonds between " +
+                  temp[0] +
+                  " and " +
+                  temp[1] +
+                  " are incorrect.";
                 break;
               }
-            }
-            else {
-              if(findValueByPrefix(bondCount, temp[0]+','+temp[1])) {
-                if(findValueByPrefix(bondCount, temp[0]+','+temp[1])<temp[2]) {
+            } else {
+              if (findValueByPrefix(bondCount, temp[0] + "," + temp[1])) {
+                if (
+                  findValueByPrefix(bondCount, temp[0] + "," + temp[1]) <
+                  temp[2]
+                ) {
                   flag = true;
-                  this.feedback = "The number of bonds between " + temp[0] + " and " + temp[1] + " can be more.";
+                  this.feedback =
+                    "The number of bonds between " +
+                    temp[0] +
+                    " and " +
+                    temp[1] +
+                    " can be more.";
                   break;
-                }
-                else if(findValueByPrefix(bondCount, temp[0]+','+temp[1])>temp[2]) {
+                } else if (
+                  findValueByPrefix(bondCount, temp[0] + "," + temp[1]) >
+                  temp[2]
+                ) {
                   flag = true;
-                  this.feedback = "The number of bonds between " + temp[0] + " and " + temp[1] + " cannot be so many. Think about how many valence electrons are there and start again.";
+                  this.feedback =
+                    "The number of bonds between " +
+                    temp[0] +
+                    " and " +
+                    temp[1] +
+                    " cannot be so many. Think about how many valence electrons are there and start again.";
                   break;
-                }
-                else {
+                } else {
                   console.log("Something is wrong"); //this condition shouldn't be possible
                 }
-              }
-              else {
+              } else {
                 flag = true;
-                this.feedback = "There can be a bond between " + temp[0] + " and " + temp[1] + ".";
+                this.feedback =
+                  "There can be a bond between " +
+                  temp[0] +
+                  " and " +
+                  temp[1] +
+                  ".";
                 break;
               }
             }
           }
         }
-        if (nobonds==true) {
+        if (nobonds == true) {
           flag = true;
           this.feedback = "There are no bonds.";
         }
       }
-      if (flag==false) {
+      if (flag == false) {
         this.feedback = "Good Job!";
         feedbackBG = document.getElementById("feedback-text");
         feedbackBG.className = "";
         feedbackBG.className += "feedback-correct";
-      }
-      else {
+      } else {
         feedbackBG = document.getElementById("feedback-text");
         feedbackBG.className = "";
         feedbackBG.className += "feedback-incorrect";

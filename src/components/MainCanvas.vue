@@ -7,6 +7,7 @@
       v-bind:is="atom.type + '-atom'"
       v-bind:x="atom.x"
       v-bind:y="atom.y"
+      v-bind:isHighlighted="highlightedAtoms.includes(atom)"
     />
   </svg>
 </template>
@@ -41,6 +42,9 @@ export default {
     },
     bonds() {
       return store.state.bonds;
+    },
+    highlightedAtoms() {
+      return store.state.highlightedAtoms;
     }
   }
 };

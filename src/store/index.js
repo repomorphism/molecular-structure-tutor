@@ -17,6 +17,7 @@ export default new Vuex.Store({
     bonds: {}, // object of { (string id from atom indices) : { atom1, atom2, count } }
     bondStartAtom: null,
     feedback: null,
+    highlightedAtoms: [],
   },
   mutations: {
     setClickMode(state, mode) {
@@ -43,6 +44,9 @@ export default new Vuex.Store({
         };
       }
       state.bonds = bonds;
+    },
+    setHighlightedAtoms(state, atoms) {
+      state.highlightedAtoms = atoms;
     },
   },
   actions: {
@@ -95,6 +99,9 @@ export default new Vuex.Store({
         default:
           break;
       }
+    },
+    setHighlightedAtoms(context, atoms) {
+      context.commit("setHighlightedAtoms", atoms);
     },
   },
 });
