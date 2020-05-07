@@ -7,10 +7,16 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    molecule: "C2H4",
+    moleculeBonds: {
+      '["C","C",2]': 1,
+      '["H","C",1]': 4,
+    }, //array of [[total_bond_count_in_molecule,{symbol1, symbol2, count}]]
     clickMode: ClickMode.NORMAL,
-    atoms: [], // array of {type, x, y} where type = carbon/hydrogen
+    atoms: [], // array of {symbol, type, x, y} where type = carbon/hydrogen
     bonds: {}, // object of { (string id from atom indices) : { atom1, atom2, count } }
     bondStartAtom: null,
+    feedback: null,
   },
   mutations: {
     setClickMode(state, mode) {
@@ -47,12 +53,13 @@ export default new Vuex.Store({
       const { x, y } = position;
       switch (context.state.clickMode) {
         case ClickMode.ADD_CARBON:
-          context.commit("addAtom", { type: "carbon", x, y });
+          context.commit("addAtom", { type: "carbon", symbol: "C", x, y });
           context.commit("setClickMode", ClickMode.NORMAL);
           break;
         case ClickMode.ADD_HYDROGEN:
           context.commit("addAtom", {
             type: "hydrogen",
+            symbol: "H",
             x,
             y,
           });
