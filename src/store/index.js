@@ -52,12 +52,8 @@ export default new Vuex.Store({
     setDraggedAtom(state, atom) {
       state.draggedAtom = atom;
     },
-    updateAtom(state, changedAtom) {
-      const { oldAtom, newAtom } = changedAtom;
-      const atoms = state.atoms.slice();
-      const index = state.atoms.indexOf(oldAtom);
-      atoms[index] = newAtom;
-      state.atoms = atoms;
+    updateAtoms(state) {
+      state.atoms = state.atoms.slice();
     },
   },
   actions: {
@@ -129,10 +125,9 @@ export default new Vuex.Store({
           context.commit("setClickMode", ClickMode.NORMAL);
           context.commit("setDraggedAtom", null);
         } else if (type == "mousemove") {
-          const oldAtom = draggedAtom;
-          const newAtom = { ...draggedAtom, x, y };
-          context.commit("setDraggedAtom", newAtom);
-          context.commit("updateAtom", { oldAtom, newAtom });
+          draggedAtom.x = x;
+          draggedAtom.y = y;
+          context.commit("updateAtoms");
         }
       }
     },
