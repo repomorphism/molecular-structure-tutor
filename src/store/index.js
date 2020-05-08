@@ -18,6 +18,7 @@ export default new Vuex.Store({
     bondStartAtom: null,
     feedback: null,
     highlightedAtoms: [],
+    draggedAtom: null,
   },
   mutations: {
     setClickMode(state, mode) {
@@ -48,6 +49,16 @@ export default new Vuex.Store({
     setHighlightedAtoms(state, atoms) {
       state.highlightedAtoms = atoms;
     },
+    setDraggedAtom(state, atom) {
+      state.draggedAtom = atom;
+    },
+    updateAtom(state, changedAtom) {
+      const { oldAtom, newAtom } = changedAtom;
+      const atoms = state.atoms.slice();
+      const index = state.atoms.indexOf(oldAtom);
+      atoms[index] = newAtom;
+      state.atoms = atoms;
+    },
   },
   actions: {
     setClickMode(context, mode) {
@@ -71,12 +82,12 @@ export default new Vuex.Store({
           break;
         case ClickMode.ADD_BOND: {
           // Find which atom is clicked
-          let clickedAtom = findClickedAtom(context.state.atoms, x, y);
+          const clickedAtom = findClickedAtom(context.state.atoms, x, y);
           if (!clickedAtom) {
             break;
           }
 
-          let startAtom = context.state.bondStartAtom;
+          const startAtom = context.state.bondStartAtom;
           if (startAtom) {
             if (clickedAtom != startAtom) {
               // Add bond
@@ -98,6 +109,31 @@ export default new Vuex.Store({
         }
         default:
           break;
+      }
+    },
+    handleDragAction(context, event) {
+      const { type, x, y } = event;
+      const clickMode = context.state.clickMode;
+      const draggedAtom = context.state.draggedAtom;
+
+      if (clickMode == ClickMode.NORMAL) {
+        if (type == "mousedown") {
+          const draggedAtom = findClickedAtom(context.state.atoms, x, y);
+          if (draggedAtom) {
+            context.commit("setClickMode", ClickMode.DRAG_ATOM);
+            context.commit("setDraggedAtom", draggedAtom);
+          }
+        }
+      } else if (clickMode == ClickMode.DRAG_ATOM) {
+        if (type == "mouseup") {
+          context.commit("setClickMode", ClickMode.NORMAL);
+          context.commit("setDraggedAtom", null);
+        } else if (type == "mousemove") {
+          const oldAtom = draggedAtom;
+          const newAtom = { ...draggedAtom, x, y };
+          context.commit("setDraggedAtom", newAtom);
+          context.commit("updateAtom", { oldAtom, newAtom });
+        }
       }
     },
     setHighlightedAtoms(context, atoms) {
