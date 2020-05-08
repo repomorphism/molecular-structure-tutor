@@ -22,7 +22,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 2px solid lightgray;
+  border-bottom: 2px solid lightgray;
 }
 
 #title-texts {
