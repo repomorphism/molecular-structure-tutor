@@ -147,6 +147,10 @@ header {
   font-weight: bold;
   border: none;
 }
+
+#feedback-text {
+  display: none;
+}
 </style>
 
 <template>
@@ -156,7 +160,7 @@ header {
         <navigation-bar />
         <header>
           <select id="select-question">
-            <option value="C2H2">C2H2</option>
+            <option value="C2H2">{{this.molecule}}</option>
           </select>
           <button id="add-question-button">Add question</button>
           <button id="role-button" @click="setUserRole('student')">Test Drive</button>
@@ -180,7 +184,7 @@ header {
         <section id="work-area">
             <main-canvas />
             <items-drawer />
-            <feedback-box v-if="submitted" id="feedback-text" />
+            <feedback-box id="feedback-text" />
             <button id="done-button" @click="onClick">DONE</button>
         </section>
     </div>
@@ -215,8 +219,7 @@ export default {
     },
     data: function() {
         return {
-            userRole: "teacher",  //userRole: "student",
-            submitted: false  //submitted is false then no feedback box displayed
+            userRole: "teacher"  //userRole: "student/teacher",
         };
     },
     methods: {
@@ -258,46 +261,43 @@ export default {
                 });
                 var atomCount = {},
                     bondCount = {},
+                    atomids = {},
                     bondids = {},
                     flag = false,
                     i,
                     j,
                     k,
-                    feedbackBG,
                     nobonds = true; //atomCount is count of atoms in canvas right now
                 var temp = this.molecule.split(/([0-9]+)/); //separating molecule into array of [symbol, count]
                 for (j = 0; j < temp.length - 1; j += 2) {
                     atomCount[temp[j]] = 0;
                 }
-                this.submitted = true;
                 for (k in this.atoms) {
                     if (k in this.atoms) {
-                        if (this.atoms[k].symbol in atomCount) {
+                        if (this.atoms[k].symbol in atomids) {
                             atomCount[this.atoms[k].symbol] =
                                 atomCount[this.atoms[k].symbol] + 1;
+                            atomids[this.atoms[k].symbol].push(this.atoms[k]);
                         } else {
-                            atomCount[this.atoms[k].symbol] = 1;
+                          atomCount[this.atoms[k].symbol] =
+                              atomCount[this.atoms[k].symbol] + 1;
+                            atomids[this.atoms[k].symbol]=[this.atoms[k]];
                         }
                     }
                 }
                 for (i = 0; i < temp.length - 1; i += 2) {
-                    //console.log(i, atomCount[temp[i]], temp[i+1]);
+                    console.log(temp[i],atomids[temp[i]]);
                     if (atomCount[temp[i]] < temp[i + 1]) {
                         flag = true;
+                        this.setHighlightedAtoms(atomids[temp[i]]);
                         this.feedback =
-                            "The " +
-                            temp[i] +
-                            " atoms are missing. Add more " +
-                            temp[i] +
-                            " atoms from the sidebar";
+                            "That won’t work because the number of "+temp[i]+" atoms you put is not the same as the molecule in question. Put more "+temp[i]+" in the canvas and try again.";
                         break;
                     }
                     if (atomCount[temp[i]] > temp[i + 1]) {
                         flag = true;
                         this.feedback =
-                            "The " +
-                            temp[i] +
-                            " atoms are more than required. See the question carefully  and start again";
+                            "That won’t work because the number of "+temp[i]+" atoms you put is not the same as the molecule in question. Delete the extra [atom_symbol] in the canvas and try again.";
                         break;
                     }
                 }
@@ -305,7 +305,7 @@ export default {
                     for (k in this.bonds) {
                         if (k in this.bonds) {
                             if ([this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count] in bondCount) {
-                                if (this.bonds[k].atom1.symbol == this.bonds[k].atom1.symbol) {
+                                if (this.bonds[k].atom1.symbol == this.bonds[k].atom2.symbol) {
                                     bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] + 1;
                                     bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]].push(k);
                                 } else {
@@ -318,7 +318,7 @@ export default {
                                 bondCount[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = 1;
                                 bondCount[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol, this.bonds[k].count]] = 1;
                                 bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = [k];
-                                bondids[[this.bonds[k].atom1.symbol, this.bonds[k].atom2.symbol, this.bonds[k].count]] = [k];
+                                bondids[[this.bonds[k].atom2.symbol, this.bonds[k].atom1.symbol, this.bonds[k].count]] = [k];
                             }
                             console.log(k, bondCount);
                             nobonds = false;
@@ -375,11 +375,7 @@ export default {
                                         this.setHighlightedAtoms([this.bonds[bondids[findValueBySuffix(bondids, [temp[0] + "," + temp[1]], temp[2])]].atom1, this.bonds[bondids[findValueBySuffix(bondids, [temp[0] + "," + temp[1]], temp[2])]].atom2]);
                                         flag = true;
                                         this.feedback =
-                                            "The number of bonds between " +
-                                            temp[0] +
-                                            " and " +
-                                            temp[1] +
-                                            " can be more.";
+                                            "That won’t work because "+findValueByPrefix(bondCount, temp[0] + "," + temp[1])+" is not the required bond number between "+temp[0]+" and "+temp[1]+". Add the missing bonds to reach the required bond number.";
                                         break;
                                     } else if (
                                         findValueByPrefix(bondCount, temp[0] + "," + temp[1]) >
@@ -388,11 +384,7 @@ export default {
                                       this.setHighlightedAtoms([this.bonds[bondids[findValueBySuffix(bondids, [temp[0] + "," + temp[1]], temp[2])]].atom1, this.bonds[bondids[findValueBySuffix(bondids, [temp[0] + "," + temp[1]], temp[2])]].atom2]);
                                         flag = true;
                                         this.feedback =
-                                            "The number of bonds between " +
-                                            temp[0] +
-                                            " and " +
-                                            temp[1] +
-                                            " cannot be so many. Think about how many valence electrons are there and start again.";
+                                            "That won’t work because "+findValueByPrefix(bondCount, temp[0] + "," + temp[1])+" is not the required bond number between "+temp[0]+" and "+temp[1]+". Delete the extra bonds to reach the required bond number.";
                                         break;
                                     } else {
                                         console.log("Something is wrong"); //this condition shouldn't be possible
@@ -415,15 +407,12 @@ export default {
                         this.feedback = "There are no bonds.";
                     }
                 }
+                document.getElementById("feedback-text").style.display = "block";
                 if (flag == false) {
                     this.feedback = "Good Job!";
-                    feedbackBG = document.getElementById("feedback-text");
-                    feedbackBG.className = "";
-                    feedbackBG.className += "feedback-correct";
+                    document.getElementById("feedback-text").className = "feedback-correct";
                 } else {
-                    feedbackBG = document.getElementById("feedback-text");
-                    feedbackBG.className = "";
-                    feedbackBG.className += "feedback-incorrect";
+                    document.getElementById("feedback-text").className = "feedback-incorrect";
                 }
             },
             setUserRole(role) {

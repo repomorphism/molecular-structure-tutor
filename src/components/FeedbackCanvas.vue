@@ -28,13 +28,25 @@ export default {
    return {
      definefeeds: [
        {  id: 1,
-          condition: 'If all electrons are not entered',
-          feedback: 'C has 4 electrons and H has 2 electrons',
+          condition: 'If [atom_symbol] are missing',
+          feedback: 'That won’t work because the number of [atom_symbol] atoms you put is not the same as the molecule in question. Put more [atom_symbol] in the canvas and try again.',
           edit: false},
-       {  id: 2,
-          condition: 'If all atoms are present',
-          feedback: 'C2H4 has 2 carbons and 4 hydrogens',
-          edit: false}
+          {  id: 2,
+             condition: 'If [atom_symbol] are extra',
+             feedback: 'That won’t work because the number of [atom_symbol] atoms you put is not the same as the molecule in question. Delete the extra [atom_symbol] in the canvas and try again.',
+             edit: false},
+             {  id: 3,
+                condition: 'If [atom_symbol] is not in any bond',
+                feedback: 'That won’t work because all atoms should have atleast one bond with other atoms. Add bonds for [atom_symbol].',
+                edit: false},
+                {  id: 4,
+                   condition: 'If the bonds between [atom_symbol 1] and [atom_symbol 2] are missing',
+                   feedback: 'That won’t work because [number_of_bond] is not the required bond number between [atom_symbol 1] and [atom_symbol 2]. Add the missing bonds to reach the required bond number.',
+                   edit: false},
+                   {  id: 5,
+                      condition: 'If the bonds between [atom_symbol 1] and [atom_symbol 2] are extra',
+                      feedback: 'That won’t work because [number_of_bond] is not the required bond number between [atom_symbol 1] and [atom_symbol 2]. Delete the extra bonds to reach the required bond number.',
+                      edit: false}
      ],
     editedDefinefeeds: null
    }

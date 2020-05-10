@@ -22,7 +22,7 @@ export default {
 section {
   text-align: left;
   position: absolute;
-  width: 530px;
+  width: 700px;
   height: 54px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.16);
   border-radius: 10px 10px 10px 10px;
