@@ -10,6 +10,8 @@ export default {
 
 <style scoped>
 header {
-  height: 58px;
+  height: 38px;
+  background: #ECECEC;
+  border: 2px solid lightgray;
 }
 </style>

@@ -7,10 +7,18 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    molecule: "C2H4",
+    moleculeBonds: {
+      '["C","C",2]': 1,
+      '["H","C",1]': 4,
+    }, //array of [[total_bond_count_in_molecule,{symbol1, symbol2, count}]]
     clickMode: ClickMode.NORMAL,
-    atoms: [], // array of {type, x, y} where type = carbon/hydrogen
+    atoms: [], // array of {symbol, type, x, y} where type = carbon/hydrogen
     bonds: {}, // object of { (string id from atom indices) : { atom1, atom2, count } }
     bondStartAtom: null,
+    feedback: null,
+    highlightedAtoms: [],
+    draggedAtom: null,
   },
   mutations: {
     setClickMode(state, mode) {
@@ -38,6 +46,15 @@ export default new Vuex.Store({
       }
       state.bonds = bonds;
     },
+    setHighlightedAtoms(state, atoms) {
+      state.highlightedAtoms = atoms;
+    },
+    setDraggedAtom(state, atom) {
+      state.draggedAtom = atom;
+    },
+    updateAtoms(state) {
+      state.atoms = state.atoms.slice();
+    },
   },
   actions: {
     setClickMode(context, mode) {
@@ -47,12 +64,13 @@ export default new Vuex.Store({
       const { x, y } = position;
       switch (context.state.clickMode) {
         case ClickMode.ADD_CARBON:
-          context.commit("addAtom", { type: "carbon", x, y });
+          context.commit("addAtom", { type: "carbon", symbol: "C", x, y });
           context.commit("setClickMode", ClickMode.NORMAL);
           break;
         case ClickMode.ADD_HYDROGEN:
           context.commit("addAtom", {
             type: "hydrogen",
+            symbol: "H",
             x,
             y,
           });
@@ -60,12 +78,12 @@ export default new Vuex.Store({
           break;
         case ClickMode.ADD_BOND: {
           // Find which atom is clicked
-          let clickedAtom = findClickedAtom(context.state.atoms, x, y);
+          const clickedAtom = findClickedAtom(context.state.atoms, x, y);
           if (!clickedAtom) {
             break;
           }
 
-          let startAtom = context.state.bondStartAtom;
+          const startAtom = context.state.bondStartAtom;
           if (startAtom) {
             if (clickedAtom != startAtom) {
               // Add bond
@@ -88,6 +106,33 @@ export default new Vuex.Store({
         default:
           break;
       }
+    },
+    handleDragAction(context, event) {
+      const { type, x, y } = event;
+      const clickMode = context.state.clickMode;
+      const draggedAtom = context.state.draggedAtom;
+
+      if (clickMode == ClickMode.NORMAL) {
+        if (type == "mousedown") {
+          const draggedAtom = findClickedAtom(context.state.atoms, x, y);
+          if (draggedAtom) {
+            context.commit("setClickMode", ClickMode.DRAG_ATOM);
+            context.commit("setDraggedAtom", draggedAtom);
+          }
+        }
+      } else if (clickMode == ClickMode.DRAG_ATOM) {
+        if (type == "mouseup") {
+          context.commit("setClickMode", ClickMode.NORMAL);
+          context.commit("setDraggedAtom", null);
+        } else if (type == "mousemove") {
+          draggedAtom.x = x;
+          draggedAtom.y = y;
+          context.commit("updateAtoms");
+        }
+      }
+    },
+    setHighlightedAtoms(context, atoms) {
+      context.commit("setHighlightedAtoms", atoms);
     },
   },
 });
